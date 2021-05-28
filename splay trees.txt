@@ -1,0 +1,689 @@
+#include <iostream>
+using namespace std;
+
+class Nod{
+public:
+    int valoare;
+    int indice;
+    int indice_tata;
+    int indice_fiu_stanga;
+    int indice_fiu_dreapta;
+    Nod();
+    Nod(int);
+    Nod( int, int );
+    Nod(int, int, int, int, int);
+    ~Nod(){};
+    Nod &operator = ( Nod &ob );
+    Nod( const Nod &ob );
+    friend istream &operator >> ( istream &in, Nod &ob );
+    friend ostream &operator << ( ostream &out, Nod &ob );
+    void citire();
+    void afisare();
+};
+
+Nod::Nod(){
+    valoare = 0;
+    indice = 0;
+    indice_tata = -1;
+    indice_fiu_stanga = -1;
+    indice_fiu_dreapta = -1;
+}
+Nod::Nod( int x ){
+    valoare = x;
+    indice = 0;
+    indice_tata = -1;
+    indice_fiu_stanga = -1;
+    indice_fiu_dreapta = -1;
+}
+Nod::Nod( int x, int y ){
+    valoare = x;
+    indice = y;
+    indice_tata = -1;
+    indice_fiu_stanga = -1;
+    indice_fiu_dreapta = -1;
+}
+Nod::Nod( int x, int y,int h, int z, int a ){
+    valoare = x;
+    indice = y;
+    indice_tata = h;
+    indice_fiu_stanga = z;
+    indice_fiu_dreapta = a;
+}
+Nod &Nod::operator = ( Nod &ob ){
+    if( this != &ob ){
+        valoare = ob.valoare;
+        indice = ob.indice;
+        indice_tata = ob.indice_tata;
+        indice_fiu_stanga = ob.indice_fiu_stanga;
+        indice_fiu_dreapta = ob.indice_fiu_dreapta;
+    }
+    return *this;
+}
+Nod::Nod( const Nod &ob ){
+    valoare = ob.valoare;
+    indice = ob.indice;
+    indice_tata = ob.indice_tata;
+    indice_fiu_stanga = ob.indice_fiu_stanga;
+    indice_fiu_dreapta = ob.indice_fiu_dreapta;
+}
+istream &operator >> ( istream &in, Nod &ob ){
+    cout << "Introduceti valoarea nodului: ";
+    in >> ob.valoare;
+    return in;
+}
+ostream &operator << ( ostream &out, Nod &ob ){
+    out << "Valoare: " << ob.valoare << endl;
+    out << "Indice: " << ob.indice << endl;
+    out << "Indice tata: " << ob.indice_tata << endl;
+    out << "Indice fiu stanga: " << ob.indice_fiu_stanga << endl;
+    out << "Indice fiu dreapta: " << ob.indice_fiu_dreapta << endl;
+    return out;
+}
+void Nod::citire(){
+    cout << "Introduceti valoarea nodului: ";
+    cin >> valoare;
+}
+void Nod::afisare(){
+    cout << "Valoare: " << valoare << endl;
+    cout << "Indice: " << indice << endl;
+    cout << "Indice tata: " << indice << endl;
+    cout << "Indice fiu stanga: " << indice_fiu_stanga << endl;
+    cout << "Indice fiu dreapta: " << indice_fiu_dreapta << endl;
+}
+
+class Arbore{
+public:
+    int marime_totala;
+    int lungime;
+    Nod *arbore;
+public:
+    Arbore();
+    Arbore(int l);
+    ~Arbore(){};
+    Arbore( const Arbore &ob );
+    Arbore &operator = (Arbore &ob);
+    void adauga_nod( int );
+    int minim();
+    int maxim();
+    int cauta(int);
+    int succesor( int );
+    int Succesor( int );
+    int Predecesor(int);
+    int predecesor( int );
+    void stergere( int, int );
+    void re_size_plus();
+    void re_size_minus();
+    void afisare_sortate();
+    void splay(int);
+    void stanga(int pozitie);
+    void dreapta(int pozitie);
+    void citire();
+    void afisare();
+    int cauta_fara(int);
+    friend istream &operator >> ( istream &in, Arbore &ob );
+    friend ostream &operator << ( ostream &out, Arbore &ob );
+};
+Arbore::Arbore(){
+    lungime = 0;
+    marime_totala = 1;
+    arbore = new Nod [marime_totala];
+}
+Arbore::Arbore( int l ){
+    lungime = 0;
+    marime_totala = l;
+    arbore = new Nod [l];
+}
+Arbore::Arbore(const Arbore &ob){
+    marime_totala = ob.marime_totala;
+    lungime = ob.lungime;
+    arbore = new Nod [lungime];
+    for( int i = 0; i < ob.lungime; i++ ){
+        arbore[i] = ob.arbore[i];
+    }
+}
+Arbore &Arbore::operator =( Arbore &ob ){
+    if( this != &ob ){
+        marime_totala = ob.marime_totala;
+        lungime = ob.lungime;
+        arbore = new Nod [lungime];
+        for( int i = 0; i < ob.lungime; i++ ){
+            arbore[i] = ob.arbore[i];
+        }
+    }
+    return *this;
+}
+void Arbore::re_size_plus(){
+    Nod x[lungime];
+    for( int i = 0; i < lungime; i++ ){
+        x[i] = arbore[i];
+    }
+    marime_totala = marime_totala*2;
+    delete [] arbore;
+    arbore = new Nod [marime_totala];
+    for( int i = 0; i < lungime; i++ ){
+        arbore[i] = x[i];
+    }
+}
+void Arbore::re_size_minus(){
+    Nod x[lungime];
+    for( int i = 0; i < lungime; i++ ){
+        x[i] = arbore[i];
+    }
+    marime_totala = marime_totala/2;
+    delete [] arbore;
+    arbore = new Nod [marime_totala];
+    for( int i = 0; i < lungime; i++ ){
+        arbore[i] = x[i];
+    }
+}
+void Arbore::adauga_nod(int q){
+    Nod nod(q);
+    int i = 0, ok = 1;
+    while( arbore[i].indice_tata != -1 ){
+        i = arbore[i].indice_tata;
+    }
+    if( lungime == marime_totala ){
+        Arbore::re_size_plus();
+    }
+    nod.indice = lungime;
+    while( ok == 1 ){
+        if( nod.valoare > arbore[i].valoare && arbore[i].indice_fiu_dreapta != -1 ){
+            i = arbore[i].indice_fiu_dreapta;
+        }
+        else{
+            if( nod.valoare < arbore[i].valoare && arbore[i].indice_fiu_stanga != -1 ){
+                i = arbore[i].indice_fiu_stanga;
+            }
+            else ok = 0;
+        }
+    }
+    if( nod.valoare >= arbore[i].valoare ){
+        arbore[i].indice_fiu_dreapta = nod.indice;
+        if( lungime != 0 ) nod.indice_tata = i;
+    }
+    else{
+        arbore[i].indice_fiu_stanga = nod.indice;
+        if( lungime != 0 ) nod.indice_tata = i;
+    }
+    arbore[lungime] = nod;
+    splay(lungime);
+    lungime++;
+}
+int Arbore::minim(){
+    int i = 0;
+    while( arbore[i].indice_tata != -1 ) i = arbore[i].indice_tata;
+    while( arbore[i].indice_fiu_stanga != -1 ){
+        i = arbore[i].indice_fiu_stanga;
+    }
+    return arbore[i].valoare;
+}
+int Arbore::maxim(){
+    int i = 0;
+    while( arbore[i].indice_tata != -1 ) i = arbore[i].indice_tata;
+    while( arbore[i].indice_fiu_dreapta != -1 ){
+        i = arbore[i].indice_fiu_dreapta;
+    }
+    return arbore[i].valoare;
+}
+int Arbore::cauta(int q){
+    Nod nod(q);
+    int i = 0, ok = 1, gasit = 0;
+    while( arbore[i].indice_tata != -1 ) i = arbore[i].indice_tata;
+    while( ok == 1 && gasit == 0 ){
+        if( nod.valoare > arbore[i].valoare ){
+            if( arbore[i].indice_fiu_dreapta != -1 ){
+                i = arbore[i].indice_fiu_dreapta;
+            }
+            else ok = 0;
+        }
+        else{
+            if( nod.valoare < arbore[i].valoare ){
+                if( arbore[i].indice_fiu_stanga != -1 ){
+                    i = arbore[i].indice_fiu_stanga;
+                }
+                else ok = 0;
+            }
+            else gasit = 1;
+        }
+    }
+    splay(i);
+    if( gasit == 1 ) return i;
+    else return -1;
+}
+int Arbore::cauta_fara(int q){
+    Nod nod(q);
+    int i = 0, ok = 1, gasit = 0;
+    while( arbore[i].indice_tata != -1 ) i = arbore[i].indice_tata;
+    while( ok == 1 && gasit == 0 ){
+        if( nod.valoare > arbore[i].valoare ){
+            if( arbore[i].indice_fiu_dreapta != -1 ){
+                i = arbore[i].indice_fiu_dreapta;
+            }
+            else ok = 0;
+        }
+        else{
+            if( nod.valoare < arbore[i].valoare ){
+                if( arbore[i].indice_fiu_stanga != -1 ){
+                    i = arbore[i].indice_fiu_stanga;
+                }
+                else ok = 0;
+            }
+            else gasit = 1;
+        }
+    }
+    if( gasit == 1 ) return i;
+    else return -1;
+}
+int Arbore::succesor( int q ){
+    Nod nod(q);
+    int i = cauta_fara( q );
+    if( arbore[i].indice_fiu_dreapta != -1 ){
+        int ok = 1;
+        i = arbore[i].indice_fiu_dreapta;
+        while( ok ){
+            if( arbore[i].indice_fiu_stanga != -1 ){
+                i = arbore[i].indice_fiu_stanga;
+            }
+            else ok = 0;
+        }
+        return i;
+    }
+    else{
+        int contor_stanga = 0;
+        while( contor_stanga == 0 && arbore[i].indice_tata != -1 ){
+            if( arbore[ arbore[i].indice_tata ].valoare >= arbore[i].valoare ){
+                contor_stanga++;
+                i = arbore[i].indice_tata;
+            }
+            else i = arbore[i].indice_tata;
+        }
+        if( contor_stanga != 0 ){
+            return i;
+        }
+        else return -1;
+    }
+}
+int Arbore::Succesor( int q ){
+    if( succesor(q) != -1 )return arbore[succesor(q)].valoare;
+    else return -1;
+}
+int Arbore::predecesor( int q ){
+    Nod nod(q);
+    int i = cauta_fara( q );
+    if( arbore[i].indice_fiu_stanga != -1 ){
+        int ok = 1;
+        i = arbore[i].indice_fiu_stanga;
+        while( ok ){
+            if( arbore[i].indice_fiu_dreapta != -1 ){
+                i = arbore[i].indice_fiu_dreapta;
+            }
+            else ok = 0;
+        }
+        return i;
+    }
+    else{
+        int contor_dreapta = 0;
+        while( contor_dreapta == 0 && arbore[i].indice_tata != -1 ){
+            if( arbore[ arbore[i].indice_tata ].valoare <= arbore[i].valoare ){
+                contor_dreapta++;
+                i = arbore[i].indice_tata;
+            }
+            else i = arbore[i].indice_tata;
+        }
+        if( contor_dreapta != 0 ){
+            return i;
+        }
+        else return -1;
+    }
+}
+int Arbore::Predecesor( int q ){
+    if( predecesor(q) != -1 ) return arbore[predecesor(q)].valoare;
+    else return -1;
+}
+ostream &operator << ( ostream &out, Arbore &ob ){
+    out << "NUMAR TOTAL DE NODURI: " << ob.lungime << endl << endl;
+    for( int i = 0; i < ob.lungime; i++ ){
+        out << "Valoare: " << ob.arbore[i].valoare << endl;
+        if( ob.arbore[i].indice_tata != -1 ){
+            out << "Tata: " << ob.arbore[ob.arbore[i].indice_tata].valoare << endl;
+        }
+        else out << "Tata: nu are" << endl;
+        if( ob.arbore[i].indice_fiu_stanga != -1 ){
+            out << "Fiu stanga: " << ob.arbore[ ob.arbore[i].indice_fiu_stanga ].valoare <<  endl;
+        }
+        else out << "Fiu stanga: nu are" << endl;
+        if( ob.arbore[i].indice_fiu_dreapta != -1 ){
+            out << "Fiu dreapta: " << ob.arbore[ ob.arbore[i].indice_fiu_dreapta ].valoare << endl << endl;
+        }
+        else out << "Fiu dreapta: nu are" << endl << endl;
+    }
+    return out;
+}
+istream &operator >> ( istream &in, Arbore &ob ){
+    cout << "Numarul total de noduri: ";
+    in >> ob.marime_totala;
+    delete [] ob.arbore;
+    ob.arbore = new Nod[ob.marime_totala];
+    for( int i = 0; i < ob.marime_totala; i++ ){
+        cout << "Introduceti valoarea cu numarul " << i+1 <<": ";
+        int j;
+        in >> j;
+        ob.adauga_nod(j);
+    }
+    return in;
+}
+void Arbore::citire(){
+    cout << "Numarul total de noduri: ";
+    cin >> marime_totala;
+    delete [] arbore;
+    arbore = new Nod[marime_totala];
+    for( int i = 0; i < marime_totala; i++ ){
+        cout << "Introduceti valoarea cu numarul " << i+1 <<": ";
+        int j;
+        cin >> j;
+        adauga_nod(j);
+    }
+}
+void Arbore::afisare(){
+    cout << "NUMAR TOTAL DE NODURI: " << lungime << endl << endl;
+    for( int i = 0; i < lungime; i++ ){
+        cout << "Valoare: " << arbore[i].valoare << endl;
+        if( arbore[i].indice_tata != -1 ){
+            cout << "Tata: " << arbore[arbore[i].indice_tata].valoare << endl;
+        }
+        else cout << "Tata: nu are" << endl;
+        if( arbore[i].indice_fiu_stanga != -1 ){
+            cout << "Fiu stanga: " << arbore[ arbore[i].indice_fiu_stanga ].valoare <<  endl;
+        }
+        else cout << "Fiu stanga: nu are" << endl;
+        if( arbore[i].indice_fiu_dreapta != -1 ){
+            cout << "Fiu dreapta: " << arbore[ arbore[i].indice_fiu_dreapta ].valoare << endl << endl;
+        }
+        else cout << "Fiu dreapta: nu are" << endl << endl;
+    }
+}
+void Arbore::stergere(int q, int ok = 0){
+    Nod nod(q);
+    if(lungime <= marime_totala/2 ) re_size_minus();
+// daca nu are fii
+    int i = cauta_fara( q );
+    int F = arbore[i].indice_tata;
+    if( ok == 0 && F != -1 ) splay(F);
+    if( arbore[i].indice_fiu_stanga == -1 && arbore[i].indice_fiu_dreapta == -1 ){
+        if( arbore[i].indice_tata != -1 ){
+            if( arbore[ arbore[i].indice_tata ].valoare < arbore[i].valoare ){
+                arbore[ arbore[i].indice_tata ].indice_fiu_dreapta = -1;
+            }
+            else arbore[ arbore[i].indice_tata ].indice_fiu_stanga = -1;
+        }
+    }
+
+// daca are doar fiul stanga
+    if( arbore[i].indice_fiu_stanga != -1 && arbore[i].indice_fiu_dreapta == -1 ){
+        if( arbore[i].indice_tata != -1 ){
+            int w = arbore[ arbore[i].indice_tata ].valoare;
+            if( w > arbore[i].valoare ){
+                arbore[ arbore[i].indice_tata ].indice_fiu_stanga = arbore[i].indice_fiu_stanga;
+                arbore[ arbore[i].indice_fiu_stanga ].indice_tata = arbore[i].indice_tata;
+            }
+            else{
+                arbore[ arbore[i].indice_tata ].indice_fiu_dreapta = arbore[i].indice_fiu_stanga;
+                arbore[ arbore[i].indice_fiu_stanga ].indice_tata = arbore[i].indice_tata;
+            }
+        }
+        else{
+            arbore[ arbore[i].indice_fiu_stanga ].indice_tata = -1;
+        }
+    }
+// daca are doar fiu dreapta
+    if( arbore[i].indice_fiu_stanga == -1 && arbore[i].indice_fiu_dreapta != -1 ){
+        if( arbore[i].indice_tata != -1 ){
+            int w = arbore[ arbore[i].indice_tata ].valoare;
+            if( w > arbore[i].valoare ){
+                arbore[ arbore[i].indice_tata ].indice_fiu_stanga = arbore[i].indice_fiu_dreapta;
+                arbore[ arbore[i].indice_fiu_dreapta ].indice_tata = arbore[i].indice_tata;
+            }
+            else{
+                arbore[ arbore[i].indice_tata ].indice_fiu_dreapta = arbore[i].indice_fiu_dreapta;
+                arbore[ arbore[i].indice_fiu_dreapta ].indice_tata = arbore[i].indice_tata;
+            }
+        }
+        else{
+            arbore[ arbore[i].indice_fiu_dreapta ].indice_tata = -1;
+        }
+    }
+
+// daca are ambii fii
+    if( arbore[i].indice_fiu_stanga != -1 && arbore[i].indice_fiu_dreapta != -1 ){
+
+        Nod w( arbore[predecesor(arbore[i].valoare)] );
+        stergere(w.valoare,1);
+        arbore[i].valoare = w.valoare;
+        splay(F);
+        return ;
+    }
+    if( arbore[i].indice_fiu_stanga == -1 || arbore[i].indice_fiu_dreapta == -1 ){
+        if( arbore[i].valoare != arbore[lungime-1].valoare ){
+            arbore[i] = arbore[lungime-1];
+            arbore[i].indice = i;
+            if( arbore[i].indice_tata != -1 ){
+                if( arbore[i].valoare < arbore[ arbore[i].indice_tata ].valoare ){
+                arbore[ arbore[i].indice_tata ].indice_fiu_stanga = i;
+                }
+                else arbore[ arbore[i].indice_tata ].indice_fiu_dreapta = i;
+            }
+            if( arbore[i].indice_fiu_stanga != -1 ){
+                arbore[ arbore[i].indice_fiu_stanga ].indice_tata = i;
+            }
+            else{
+                if( arbore[i].indice_fiu_dreapta != -1 ){
+                    arbore[ arbore[i].indice_fiu_dreapta ].indice_tata = i;
+                }
+            }
+        }
+        lungime--;
+    }
+
+}
+void Arbore::afisare_sortate(){
+    Arbore x;
+    cout << "Ordine elemente: ";
+    int numar = minim();
+    while( Succesor(numar) != -1 ){
+        cout << numar << " ";
+        numar = Succesor(numar);
+    }
+    cout << numar;
+    cout << endl;
+}
+void Arbore::dreapta(int pozitie){
+    if( arbore[pozitie].indice_fiu_dreapta == -1 ){
+        arbore[pozitie].indice_fiu_dreapta = arbore[pozitie].indice_tata;
+        int tata = arbore[pozitie].indice_tata;
+        arbore[pozitie].indice_tata = arbore[arbore[pozitie].indice_tata].indice_tata;
+        arbore[tata].indice_fiu_stanga = -1;
+        if( arbore[tata].indice_tata != -1 ){
+            if( arbore[ arbore[tata].indice_tata ].valoare > arbore[tata].valoare ){
+                arbore[arbore[tata].indice_tata].indice_fiu_stanga = pozitie;
+            }
+            else arbore[arbore[tata].indice_tata].indice_fiu_dreapta = pozitie;
+        }
+        arbore[tata].indice_tata = pozitie;
+    }
+    else{
+        int fiu_dreapta = arbore[pozitie].indice_fiu_dreapta;
+        arbore[pozitie].indice_fiu_dreapta = arbore[pozitie].indice_tata;
+        int tata = arbore[pozitie].indice_tata;
+        arbore[pozitie].indice_tata = arbore[arbore[pozitie].indice_tata].indice_tata;
+        arbore[tata].indice_fiu_stanga = -1;
+        if( arbore[tata].indice_tata != -1 ){
+            if( arbore[ arbore[tata].indice_tata ].valoare > arbore[tata].valoare ){
+                arbore[arbore[tata].indice_tata].indice_fiu_stanga = pozitie;
+            }
+            else arbore[arbore[tata].indice_tata].indice_fiu_dreapta = pozitie;
+        }
+        arbore[tata].indice_tata = pozitie;
+        int i = tata, ok =1;
+        while( ok == 1 ){
+            if( arbore[i].valoare > arbore[fiu_dreapta].valoare ){
+                if( arbore[i].indice_fiu_stanga != -1 ) i = arbore[i].indice_fiu_stanga;
+                else ok = 0;
+            }
+            else{
+                if( arbore[i].indice_fiu_dreapta != -1 ) i = arbore[i].indice_fiu_dreapta;
+                else ok = 0;
+            }
+            if( arbore[i].valoare > arbore[fiu_dreapta].valoare ){
+                arbore[i].indice_fiu_stanga = fiu_dreapta;
+            }
+            else arbore[i].indice_fiu_dreapta = fiu_dreapta;
+        }
+        if( arbore[i].valoare > arbore[fiu_dreapta].valoare ){
+            arbore[i].indice_fiu_stanga = fiu_dreapta;
+        }
+        else arbore[i].indice_fiu_dreapta = fiu_dreapta;
+        arbore[fiu_dreapta].indice_tata = i;
+    }
+}
+void Arbore::stanga(int pozitie){
+    if( arbore[pozitie].indice_fiu_stanga == -1 ){
+        arbore[pozitie].indice_fiu_stanga = arbore[pozitie].indice_tata;
+        int tata = arbore[pozitie].indice_tata;
+        arbore[pozitie].indice_tata = arbore[arbore[pozitie].indice_tata].indice_tata;
+        arbore[tata].indice_fiu_dreapta = -1;
+        if( arbore[tata].indice_tata != -1 ){
+            if( arbore[ arbore[tata].indice_tata ].valoare > arbore[tata].valoare ){
+                arbore[arbore[tata].indice_tata].indice_fiu_stanga = pozitie;
+            }
+            else arbore[arbore[tata].indice_tata].indice_fiu_dreapta = pozitie;
+        }
+        arbore[tata].indice_tata = pozitie;
+    }
+    else{
+        int fiu_stanga = arbore[pozitie].indice_fiu_stanga;
+        arbore[pozitie].indice_fiu_stanga = arbore[pozitie].indice_tata;
+        int tata = arbore[pozitie].indice_tata;
+        arbore[pozitie].indice_tata = arbore[arbore[pozitie].indice_tata].indice_tata;
+        arbore[tata].indice_fiu_dreapta = -1;
+        if( arbore[tata].indice_tata != -1 ){
+            if( arbore[ arbore[tata].indice_tata ].valoare > arbore[tata].valoare ){
+                arbore[arbore[tata].indice_tata].indice_fiu_stanga = pozitie;
+            }
+            else arbore[arbore[tata].indice_tata].indice_fiu_dreapta = pozitie;
+        }
+        arbore[tata].indice_tata = pozitie;
+        int i = tata, ok =1;
+        while( ok == 1 ){
+            if( arbore[i].valoare > arbore[fiu_stanga].valoare ){
+                if( arbore[i].indice_fiu_stanga != -1 ) i = arbore[i].indice_fiu_stanga;
+                else ok = 0;
+            }
+            else{
+                if( arbore[i].indice_fiu_dreapta != -1 ) i = arbore[i].indice_fiu_dreapta;
+                else ok = 0;
+            }
+            if( arbore[i].valoare > arbore[fiu_stanga].valoare ){
+                arbore[i].indice_fiu_stanga = fiu_stanga;
+            }
+            else arbore[i].indice_fiu_dreapta = fiu_stanga;
+        }
+        if( arbore[i].valoare > arbore[fiu_stanga].valoare ){
+            arbore[i].indice_fiu_stanga = fiu_stanga;
+        }
+        else arbore[i].indice_fiu_dreapta = fiu_stanga;
+        arbore[fiu_stanga].indice_tata = i;
+    }
+}
+void Arbore::splay(int pozitie){
+    while( arbore[pozitie].indice_tata != -1 ){
+        if( arbore[ arbore[pozitie].indice_tata ].valoare > arbore[pozitie].valoare ){
+            Arbore::dreapta(pozitie);
+        }
+        else Arbore::stanga(pozitie);
+    }
+}
+
+int apartine( int v[], int nr ){
+    int ok = 0;
+    for( int i = 0; i < 6; i++ ){
+        if( v[i] == nr ) ok = 1;
+    }
+    return ok;
+}
+int main(){
+    Arbore z;
+    cout << "Operatii posibile:" << endl;
+    cout << "-inserare numar: 1" << endl;
+    cout << "-stergere numar: 2" << endl;
+    cout << "-afisarea succesorului unui numar: 3" << endl;
+    cout << "-afisarea predecesorului unui numar: 4" << endl;
+    cout << "-afisarea elementelor sortate: 5" << endl;
+    cout << "-inchidere consola: 0" << endl << endl;
+    int ok = 1, v[10] = {1,2,3,4,5,0};
+    while(ok){
+        cout << "-----------------------------------------------------" << endl;
+        cout << "Introduceti optiunea: ";
+        try{
+            cin >> ok;
+            if( apartine(v,ok) == 0 ) throw 1;
+        }
+        catch(int){
+            cout << "Optiune inexistenta!" << endl ;
+        }
+        if( ok == 1 ){
+            cout << endl << "Optiune aleasa: inserare numar." << endl;
+            cout << "Introduceti numarul: ";
+            int i;
+            cin >> i;
+            if( z.cauta_fara(i) == -1 ) z.adauga_nod(i);
+            else cout << "Numarul exista deja in arbore!" << endl;
+        }
+        if( ok == 2 ){
+            cout << endl << "Optiune aleasa: stergere numar." << endl;
+            cout << "Introduceti numarul: ";
+            int i;
+            cin >> i;
+            try{
+                int j = z.cauta_fara(i);
+                if( j == -1 ) throw -1;
+                z.stergere(i);
+            }
+            catch(int){cout << "Numarul nu se afla in arbore." << endl;}
+        }
+        if( ok == 3 ){
+            cout << endl << "Optiune aleasa: afisarea succesorului." << endl;
+            cout << "Introduceti numarul: ";
+            int i;
+            cin >> i;
+            if( z.cauta_fara(i) != -1 ){
+                if( z.succesor(i) != -1 ) cout << "Succesorul numarului " << i << " este: " << z.Succesor(i) << endl;
+                else cout << "Numarul nu are succesor (este maximul din sir)." << endl;
+            }
+            else cout << "Numarul nu se afla in sir!" << endl;
+        }
+        if( ok == 4 ){
+            cout << endl << "Optiune aleasa: afisarea predecesorului." << endl;
+            cout << "Introduceti numarul: ";
+            int i;
+            cin >> i;
+            if( z.cauta_fara(i) != -1 ){
+                if( z.predecesor(i) != -1 ) cout << "Predecesoul numarului " << i << " este: " << z.Predecesor(i) << endl;
+                else cout << "Numarul nu are succesor (este maximul din sir)." << endl;
+            }
+            else cout << "Numarul nu se afla in sir!" << endl;
+        }
+        if( ok == 5 ){
+            cout << endl << "Optiune aleasa: afisarea elementelor sortate." << endl;
+            z.afisare_sortate();
+        }
+        if( ok == 0 ){
+            cout << endl << "Optiune aleasa: inchidere consola." << endl;
+        }
+        cout << "-----------------------------------------------------" << endl << endl;
+    }
+}
+/*
+Surse inspiratie:
+-http://lcm.csa.iisc.ernet.in/dsa/node94.html
+-https://www.youtube.com/watch?v=qMmqOHr75b8
+*/
